@@ -8,3 +8,5 @@ if [ $# -ne 1 -o ! -f "$1" ]; then
 fi
 
 apktool d -o workdir -f "$1"
+
+python merge_lang.py -o workdir/assets/lang/en_US.lang workdir/assets/lang/en_US.lang tl.lang
