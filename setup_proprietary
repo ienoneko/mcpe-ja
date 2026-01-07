@@ -10,3 +10,8 @@ fi
 apktool d -o workdir -f "$1"
 
 python merge_lang.py -o workdir/assets/lang/en_US.lang workdir/assets/lang/en_US.lang tl.lang
+
+use_dropout_tools=dropout
+. dropout_tools.sh
+
+$HACK_PHDR workdir/lib/armeabi-v7a/libminecraftpe.so
