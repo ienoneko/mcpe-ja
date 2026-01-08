@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -22,4 +23,16 @@ map_quit (struct map_cfg *p_map)
     return;
 
   munmap (p_map->view, p_map->len);
+}
+
+void
+buf_quit (void **p_buf)
+{
+  void *buf;
+
+  buf = *p_buf;
+  if (!buf)
+    return;
+
+  free (buf);
 }
