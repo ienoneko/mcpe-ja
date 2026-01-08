@@ -32,6 +32,8 @@ main (int argc, char **argv)
   uint32_t seg_end;
   off_t new_phoff;
   off_t newfsiz;
+  size_t dropout_seg_siz;
+  uint32_t dropout_vbase;
 
   if (argc != 2)
   {
@@ -125,4 +127,39 @@ usage:
     fprintf (stderr, "cannot write seg magic\n");
     return 1;
   }
+
+  dropout_seg_siz = newfsiz - fsiz;
+  dropout_vbase = arm32_align_seg (free_vaddr, fsiz);
+
+  newphdr->p_type = PT_LOAD;
+  newphdr->p_flags = PF_R;
+  newphdr->p_align = ARM32_SEG_ALIGNMENT;
+  newphdr->p_offset = fsiz;
+  newphdr->p_filesz = newphdr->p_memsz = dropout_seg_siz;
+  newphdr->p_vaddr = newphdr->p_paddr = dropout_vbase;
+
+  if (pht_phdr)
+  {
+    pht_phdr->p_type = PT_PHDR;
+    pht_phdr->p_flags = PF_R;
+    pht_phdr->p_align = ARM32_DATA_ALIGNMENT;
+    pht_phdr->p_offset = new_phoff;
+    pht_phdr->p_filesz = pht_phdr->p_memsz = newphtsiz;
+    pht_phdr->p_vaddr = pht_phdr->p_paddr = dropout_vbase + dropout_seg_siz - newphtsiz;
+  }
+
+  if (lseek (fd, new_phoff, SEEK_SET) != new_phoff)
+  {
+    fprintf (stderr, "cannot seek to new pht region\n");
+    return 1;
+  }
+
+  if (write (fd, phtbuf, newphtsiz) != newphtsiz)
+  {
+    fprintf (stderr, "cannot write new pht");
+    return 1;
+  }
+
+  ehdr->e_phoff = new_phoff;
+  ehdr->e_phnum = nphdrnew;
 }
