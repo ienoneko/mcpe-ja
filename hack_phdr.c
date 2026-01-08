@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "dropout_arm32_align.h"
 #include "dropout_elf.h"
@@ -29,6 +30,8 @@ main (int argc, char **argv)
   uint32_t free_vaddr;
   Elf32_Phdr *phdr;
   uint32_t seg_end;
+  off_t new_phoff;
+  off_t newfsiz;
 
   if (argc != 2)
   {
@@ -100,5 +103,26 @@ usage:
 
     phdr++;
     newphdr++;
+  }
+
+  new_phoff = arm32_align_data (fsiz + DROPOUT_SIZ);
+  newfsiz = new_phoff + newphtsiz;
+
+  if (ftruncate (fd, newfsiz) < 0)
+  {
+    perror ("ftruncate");
+    return 1;
+  }
+
+  if (lseek (fd, fsiz, SEEK_SET) != fsiz)
+  {
+    fprintf (stderr, "cannot seek to seg region\n");
+    return 1;
+  }
+
+  if (write (fd, DROPOUT_SEG_MAG, DROPOUT_SEG_NMAG) != DROPOUT_SEG_NMAG)
+  {
+    fprintf (stderr, "cannot write seg magic\n");
+    return 1;
   }
 }
