@@ -1,5 +1,7 @@
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
@@ -18,6 +20,15 @@ main (int argc, char **argv)
     .view = MAP_FAILED,
   };
   Elf32_Ehdr *ehdr;
+  int nphdr;
+  int nphdrnew;
+  size_t newphtsiz;
+  AUTO_FREE void *phtbuf = NULL;
+  Elf32_Phdr *newphdr;
+  Elf32_Phdr *pht_phdr;
+  uint32_t free_vaddr;
+  Elf32_Phdr *phdr;
+  uint32_t seg_end;
 
   if (argc != 2)
   {
@@ -50,4 +61,44 @@ usage:
   ehdr = IN_VIEW(&map, 0x0);
   if (mcpeja_chk_ehdr (ehdr, fsiz))
     goto usage;
+
+  nphdr = ehdr->e_phnum;
+  nphdrnew = nphdr + 1;
+  newphtsiz = nphdrnew * sizeof(Elf32_Phdr);
+
+  phtbuf = malloc (newphtsiz);
+  if (!phtbuf)
+  {
+    perror ("malloc");
+    return 1;
+  }
+
+  newphdr = phtbuf;
+  pht_phdr = NULL;
+  free_vaddr = 0;
+
+  for (phdr = IN_VIEW(&map, ehdr->e_phoff); nphdr; nphdr--)
+  {
+    switch (phdr->p_type)
+    {
+      case PT_PHDR:
+        if (pht_phdr)
+          goto usage;
+
+        pht_phdr = newphdr;
+        break;
+
+      case PT_LOAD:
+        seg_end = phdr->p_vaddr + phdr->p_memsz;
+        if (seg_end > free_vaddr)
+          free_vaddr = seg_end;
+
+      default:
+        memcpy (newphdr, phdr, sizeof(Elf32_Phdr));
+        break;
+    }
+
+    phdr++;
+    newphdr++;
+  }
 }
