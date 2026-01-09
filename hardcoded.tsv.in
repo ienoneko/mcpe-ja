@@ -1,0 +1,13 @@
+#include "common.tsv.in"
+#define STR1(_tl, _off, _at, _pc) _tl	_off	pc_rel_off_ent	at_foff=_at,pc=_pc
+/*
+ * do not insert extra newlines or lines with only comments in *.tsv.in files!
+ *
+ * slash slash syntax wont work for comments, use slash star star slash.
+ *
+ * avoid spaces before or after comments.
+ *
+*/orig_str	new_str	str_foff	patcher_mode	patcher_args
+#if defined(MCPE_0_10_5)
+#include "mcpe_0_10_5.tsv.in"
+#endif

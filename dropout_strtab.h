@@ -1,0 +1,4 @@
+#ifndef DROPOUT_STRTAB_H
+#define DROPOUT_STRTAB_H
+
+#endif /* DROPOUT_STRTAB_H */
