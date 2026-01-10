@@ -21,7 +21,7 @@ main (int argc, char **argv)
   AUTO_UNMAP struct map_cfg map = {
     .view = MAP_FAILED,
   };
-  Elf32_Ehdr *ehdr;
+  Elfxx_Ehdr *ehdr;
 
   if (argc != 3)
   {

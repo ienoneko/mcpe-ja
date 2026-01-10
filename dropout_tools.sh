@@ -13,7 +13,7 @@ function chk_rebuild_lib ()
   dropout_src=$2
   dropout_inc=$3
   if [ ! -f $dropout_lib -o $dropout_inc -nt $dropout_lib -o $dropout_src -nt $dropout_lib -o $dropout_tools -nt $dropout_lib ]; then
-    (set -x && cc -MD -MT $dropout_lib -MP -MF ${dropout_lib}.d -fPIC -O2 -g -shared -o $dropout_lib $dropout_src)
+    (set -x && cc -MD -MT $dropout_lib -MP -MF ${dropout_lib}.d $CPPFLAGS -fPIC -O2 -g -shared -o $dropout_lib $dropout_src)
   fi
 }
 
@@ -37,7 +37,7 @@ function rebuild_tool ()
   tool_obj=${1}.o
   tool_dep=${1}.d
   tool_src=$2
-  (set -x && cc -MD -MT $tool_obj -MP -MF $tool_dep -fPIC -O2 -g -c -o $tool_obj $tool_src)
+  (set -x && cc -MD -MT $tool_obj -MP -MF $tool_dep $CPPFLAGS -fPIC -O2 -g -c -o $tool_obj $tool_src)
 }
 
 function chk_rebuild_tool ()

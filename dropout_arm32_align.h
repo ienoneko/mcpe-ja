@@ -1,3 +1,7 @@
+/*
+ * note that despite the name, this should also work for x86
+ */
+
 #ifndef DROPOUT_ARM32_ALIGN_H
 #define DROPOUT_ARM32_ALIGN_H
 

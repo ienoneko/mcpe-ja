@@ -2,8 +2,8 @@
 
 set -e
 
-if [ $# -ne 1 -o ! -f "$1" ]; then
-  echo "Usage: $0 <path to APK>" >&2
+if [ $# -lt 1 -o $# -gt 2 -o ! -f "$1" ]; then
+  echo "Usage: $0 <path to APK> [architecture]" >&2
   exit 1
 fi
 
@@ -12,17 +12,30 @@ apktool d -o workdir -f "$1"
 lang_file=workdir/assets/lang/en_US.lang
 python merge_lang.py -o $lang_file $lang_file tl.lang
 
+game_arch=$2
+
+if [ -z "$game_arch" ]; then
+  game_arch=armeabi-v7a
+else
+  case $game_arch in
+    x86)
+      CPPFLAGS+=' -DMCPE_X86'
+      ;;
+  esac
+  echo "remember to set GAME_ARCH before make"
+fi
+
 use_dropout_tools=dropout
 . dropout_tools.sh
 
-game_lib=workdir/lib/armeabi-v7a/libminecraftpe.so
+game_lib=workdir/lib/$game_arch/libminecraftpe.so
 $HACK_PHDR $game_lib
 
 game_ver=$(./read_mcpe_ver.sh workdir/apktool.yml)
 table_file_pp=tool_bin/hardcoded.tsv
 
 if [ ! -f $table_file_pp -o hardcoded.tsv.in -nt $table_file_pp -o common.tsv.in -nt $table_file_pp -o mcpe_${game_ver}.tsv.in -nt $table_file_pp -o read_mcpe_ver.sh -nt $table_file_pp -o cpp_wrapper.sh -nt $table_file_pp -o "$0" -nt $table_file_pp ]; then
-  ./cpp_wrapper.sh -DMCPE_${game_ver} -MD -MT $table_file_pp -MP -MF ${table_file_pp}.d -o $table_file_pp hardcoded.tsv.in
+  ./cpp_wrapper.sh -DMCPE_${game_ver} -MD -MT $table_file_pp -MP -MF ${table_file_pp}.d $CPPFLAGS -o $table_file_pp hardcoded.tsv.in
 fi
 
 $NATIVE_LOCALIZER $game_lib $table_file_pp

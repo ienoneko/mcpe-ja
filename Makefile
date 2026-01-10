@@ -1,8 +1,14 @@
+GAME_ARCH ?= armeabi-v7a
+
 CFLAGS += -O2 -fPIC -g
+
+ifeq ($(GAME_ARCH),x86)
+  CPPFLAGS += -DMCPE_X86
+endif
 
 STRINGS_XML := workdir/res/values-ja/strings.xml
 LANG_FILE := workdir/assets/lang/en_US.lang
-GAME_NATIVE := workdir/lib/armeabi-v7a/libminecraftpe.so
+GAME_NATIVE := workdir/lib/$(GAME_ARCH)/libminecraftpe.so
 UNSIGNED_APK := workdir/dist/unsigned.apk
 
 NATIVE_STRINGS := tool_bin/hardcoded.tsv
@@ -25,7 +31,7 @@ $(LANG_FILE): tl.lang
 -include $(NATIVE_STRINGS).d
 
 $(NATIVE_STRINGS): hardcoded.tsv.in $(CPPWRAP) $(READ_MCPE_VER) $(APKTOOL_YML)
-	$(CPPWRAP) -DMCPE_$(shell $(READ_MCPE_VER) $(APKTOOL_YML)) -MD -MT $@ -MP -MF $@.d -o $@ $<
+	$(CPPWRAP) -DMCPE_$(shell $(READ_MCPE_VER) $(APKTOOL_YML)) -MD -MT $@ -MP -MF $@.d $(CPPFLAGS) -o $@ $<
 
 $(GAME_NATIVE): $(NATIVE_LOCALIZER) $(NATIVE_STRINGS)
 	$(NATIVE_LOCALIZER) $(GAME_NATIVE) $(NATIVE_STRINGS)

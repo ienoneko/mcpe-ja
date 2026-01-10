@@ -7,6 +7,7 @@ use `pm path com.mojang.minecraftpe` and pull it
 to play on recent devices, install using ADB and pass `--bypass-low-target-sdk-block`
 
 currently only the original 32-bit arm build of version 0.10.5 alpha is supported
+(it might build for x86, but support is incomplete and untested; 64-bit is not supported, but some internal libraries might have some levels of that capability)
 
 ## Disclaimers:
 

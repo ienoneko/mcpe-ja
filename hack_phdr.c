@@ -20,15 +20,15 @@ main (int argc, char **argv)
   AUTO_UNMAP struct map_cfg map = {
     .view = MAP_FAILED,
   };
-  Elf32_Ehdr *ehdr;
+  Elfxx_Ehdr *ehdr;
   int nphdr;
   int nphdrnew;
   size_t newphtsiz;
   AUTO_FREE void *phtbuf = NULL;
-  Elf32_Phdr *newphdr;
-  Elf32_Phdr *pht_phdr;
+  Elfxx_Phdr *newphdr;
+  Elfxx_Phdr *pht_phdr;
   uint32_t free_vaddr;
-  Elf32_Phdr *phdr;
+  Elfxx_Phdr *phdr;
   uint32_t seg_end;
   off_t new_phoff;
   off_t newfsiz;
@@ -69,7 +69,7 @@ usage:
 
   nphdr = ehdr->e_phnum;
   nphdrnew = nphdr + 1;
-  newphtsiz = nphdrnew * sizeof(Elf32_Phdr);
+  newphtsiz = nphdrnew * sizeof(Elfxx_Phdr);
 
   phtbuf = malloc (newphtsiz);
   if (!phtbuf)
@@ -99,7 +99,7 @@ usage:
           free_vaddr = seg_end;
 
       default:
-        memcpy (newphdr, phdr, sizeof(Elf32_Phdr));
+        memcpy (newphdr, phdr, sizeof(Elfxx_Phdr));
         break;
     }
 
